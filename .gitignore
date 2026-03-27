@@ -5,6 +5,4 @@ placement/*
 temp/*
 build/*
 library/placedRoutedDCPs/*
-
-
-
+.gradle/*
