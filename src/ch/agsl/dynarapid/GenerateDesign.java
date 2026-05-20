@@ -10,6 +10,7 @@ package ch.agsl.dynarapid;
 
 import ch.agsl.dynarapid.debug.PlacementInfo;
 import ch.agsl.dynarapid.debug.TimeProfiler;
+import ch.agsl.dynarapid.entry.InsertBuffers;
 import ch.agsl.dynarapid.entry.Start;
 import ch.agsl.dynarapid.error.ErrorLogger;
 import ch.agsl.dynarapid.graphgenerator.GraphGenerator;
@@ -158,6 +159,8 @@ public class GenerateDesign {
             System.out.println("-center <arg> - Center of the design.");
             System.out.println("\t<arg> : Can be the name of SLICE site like SLICE_X#_Y#");
             System.out.println("\t<arg> : Can be R<row_number>_C<column_number>_Side<side>. The side can be -1 for left and +1 for right");
+            System.out.println("-targetPeriod <arg> - Period the design should reach. DynaRapid will try to achieve the specified period by inserting buffers.");
+            System.out.println("-pipeline - Specifies that the design should have buffers inserted in such a way, so that it may take 1 input every clock cycle. Only works on linear designs.");
             System.out.println("-bit <arg> - Use Vivado (if on PATH) to generate a bitstream");
             return;
         }
@@ -404,6 +407,41 @@ public class GenerateDesign {
         }
         if(!TimeProfiler.endTimeElement("Environment Creation"))
             return;
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        int targetPeriodIndex = StringUtils.findInArray("-targetPeriod", args);
+        boolean pipeline = StringUtils.findInArray("-pipeline", args) != -1;
+
+        if (targetPeriodIndex != -1 || pipeline) {
+            Double targetPeriod = null;
+
+            if (targetPeriodIndex != -1) {
+                if (args.length <= targetPeriodIndex + 1) {
+                    System.out.println("ERROR: Format of the targetPeriod argument is incorrect. See -help for correct usage.");
+                    return;
+                } else {
+                    targetPeriod = Double.parseDouble(args[targetPeriodIndex + 1]);
+                }
+            }
+
+            if (!TimeProfiler.addAndStartTimeElement("Graph Preprocessing - Buffer Insertion", "Design Generation"))
+                return;
+
+            try {
+                InsertBuffers.bufferInsertion(dotLoc, LocationParser.designs + graphName + "/", graphName, targetPeriod, pipeline, debug);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("ERROR: Failed to buffer/pipeline design");
+                deleteDirectory(sourceDir);
+                return;
+            }
+
+            if (!TimeProfiler.endTimeElement("Graph Preprocessing - Buffer Insertion")) {
+                deleteDirectory(sourceDir);
+                return;
+            }
+        }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
