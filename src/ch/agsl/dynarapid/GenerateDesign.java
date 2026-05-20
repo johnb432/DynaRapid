@@ -24,6 +24,7 @@ import ch.agsl.dynarapid.placer.Placer;
 import ch.agsl.dynarapid.placer.RudimentaryPlacer;
 import ch.agsl.dynarapid.strings.StringUtils;
 
+import com.xilinx.rapidwright.device.Device;
 import com.xilinx.rapidwright.util.FileTools;
 import com.xilinx.rapidwright.util.VivadoTools;
 
@@ -159,6 +160,7 @@ public class GenerateDesign {
             System.out.println("-center <arg> - Center of the design.");
             System.out.println("\t<arg> : Can be the name of SLICE site like SLICE_X#_Y#");
             System.out.println("\t<arg> : Can be R<row_number>_C<column_number>_Side<side>. The side can be -1 for left and +1 for right");
+            System.out.println("-pblock <topLeft> <bottomRight> - Rectangluar pblock constraining the placement of the design. Specify both boundary coordinates in 'SLICE_X#Y#' format");
             System.out.println("-targetPeriod <arg> - Period the design should reach. DynaRapid will try to achieve the specified period by inserting buffers.");
             System.out.println("-pipeline - Specifies that the design should have buffers inserted in such a way, so that it may take 1 input every clock cycle. Only works on linear designs.");
             System.out.println("-bit <arg> - Use Vivado (if on PATH) to generate a bitstream");
@@ -336,7 +338,55 @@ public class GenerateDesign {
                     region = 2;
             }
         }
-        
+
+        int pblockIndex = StringUtils.findInArray("-pblock", args);
+
+        if (pblockIndex != -1) {
+            if (args.length <= pblockIndex + 1) {
+                System.out.println("ERROR: Format of the pblock argument is incorrect. See -help for correct usage.");
+                
+                return;
+            }
+
+            String topLeft = args[pblockIndex + 1];
+            String bottomRight = args[pblockIndex + 2];
+
+            Pattern pattern = Pattern.compile("X(\\d+)Y(\\d+)");
+            Matcher topLeftMatcher = pattern.matcher(topLeft);
+            Matcher bottomRightMatcher = pattern.matcher(bottomRight);
+
+            if (topLeft.startsWith("-") || bottomRight.startsWith("-") || !topLeftMatcher.find() || !bottomRightMatcher.find()) {
+                System.out.println("ERROR: Format of the pblock argument is incorrect. See -help for correct usage.");
+
+                return;
+            }
+
+            Device device = Device.getDevice(fpga_part);
+
+            String topLeftSiteCoord = MapElement.findInMap(device.getSite(topLeft).getTile().getName());
+            String bottomRightCoord = MapElement.findInMap(device.getSite(bottomRight).getTile().getName());
+
+            constrainCoordinates[0] = Integer.parseInt(topLeftSiteCoord.substring(0, topLeftSiteCoord.indexOf(":"))); // Top row
+            constrainCoordinates[1] = Integer.parseInt(bottomRightCoord.substring(0, bottomRightCoord.indexOf(":"))); // Bottom row
+            constrainCoordinates[2] = Integer.parseInt(topLeftSiteCoord.substring(topLeftSiteCoord.indexOf(":") + 1)); // Left column
+            constrainCoordinates[3] = Integer.parseInt(bottomRightCoord.substring(bottomRightCoord.indexOf(":") + 1)); // Right column
+
+            System.out.println("Using custom pblock: [" + constrainCoordinates[0] + ", " + constrainCoordinates[2] + "] [" + constrainCoordinates[1] + ", " + constrainCoordinates[3] + "]");
+
+            // Calculate center automatically if not specified
+            if (!isCenterSpecified) {
+                int x1 = Integer.parseInt(topLeftMatcher.group(1));
+                int y1 = Integer.parseInt(topLeftMatcher.group(2));
+
+                int x2 = Integer.parseInt(bottomRightMatcher.group(1));
+                int y2 = Integer.parseInt(bottomRightMatcher.group(2));
+
+                centerSiteName = String.format("SLICE_X%dY%d", x1 + (x2 - x1) / 2, y2 + (y1 - y2) / 2);
+                isCenterSpecified = true;
+
+                System.out.println("Center automatically calculated to center of pblock: " + centerSiteName);
+            }
+        }
 
         File sourceDir = new File(LocationParser.designs + graphName + "/");
 
