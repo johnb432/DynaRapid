@@ -159,7 +159,7 @@ public class GenerateDesign {
             System.out.println("-center <arg> - Center of the design.");
             System.out.println("\t<arg> : Can be the name of SLICE site like SLICE_X#_Y#");
             System.out.println("\t<arg> : Can be R<row_number>_C<column_number>_Side<side>. The side can be -1 for left and +1 for right");
-            System.out.println("-targetPeriod <arg> - Period the design should reach. DynaRapid will try to achieve the specified period by inserting buffers.");
+            System.out.println("-targetPeriod <arg> - Period (ns) the design should reach. DynaRapid will try to achieve the specified period by inserting buffers.");
             System.out.println("-pipeline - Specifies that the design should have buffers inserted in such a way, so that it may take 1 input every clock cycle. Only works on linear designs.");
             System.out.println("-bit <arg> - Use Vivado (if on PATH) to generate a bitstream");
             return;
@@ -319,17 +319,17 @@ public class GenerateDesign {
             switch(val) {
                 case "0":
                     region = 0;
-                    constrainCoordinates[0] = 0;
-                    constrainCoordinates[1] = 60; //MapElement.map.size()-1;
-                    constrainCoordinates[2] = 20;
-                    constrainCoordinates[3] = MapElement.map.get(0).size()-1;
+                    constrainCoordinates[0] = MapElement.map.size() - 1 - 134;  // Top row
+                    constrainCoordinates[1] = MapElement.map.size() - 1 - 90;   // Bottom row
+                    constrainCoordinates[2] = 10;                               // Left column
+                    constrainCoordinates[3] = MapElement.map.get(0).size() - 1; // Right column
                     break;
                 case "1":
                     region = 1;
-                    constrainCoordinates[0] = 120;
-                    constrainCoordinates[1] = MapElement.map.size()-1;
-                    constrainCoordinates[2] = 20;
-                    constrainCoordinates[3] = MapElement.map.get(0).size()-1;
+                    constrainCoordinates[0] = MapElement.map.size() - 1 - 44;   // Top row
+                    constrainCoordinates[1] = MapElement.map.size() - 1;        // Bottom row
+                    constrainCoordinates[2] = 10;                               // Left column
+                    constrainCoordinates[3] = MapElement.map.get(0).size() - 1; // Right column
                     break;
                 default:
                     System.out.println("Using default location");
