@@ -138,29 +138,26 @@ public class GreedyPlacer implements Placer {
         
         String siteName = "SLICE_X67Y624";
         
-         switch(GenerateDesign.fpga_part)
-         {
-                case "xczu3eg-sfvc784-1-e":
-                    //siteName = "SLICE_X37Y177";
-                    if (rl == 0)
-                        //siteName = "SLICE_X9Y29"; //left
-                        siteName = "SLICE_X40Y129"; //left
-                    else if (rl == 1)
-                        siteName = "SLICE_X40Y29"; //right
-                    else
-                        siteName = "SLICE_X37Y29"; //centered
-                    
+        switch(GenerateDesign.fpga_part)
+        {
+            case "xczu3eg-sfvc784-1-e":
+                if (rl == 0)
+                    siteName = "SLICE_X33Y112"; // top
+                else if (rl == 1)
+                    siteName = "SLICE_X33Y22";  // bottom
+                else
+                    siteName = "SLICE_X37Y29";  // centered
                 break;
-                case "xck26-sfvc784-2LV-c":
-                    //siteName = "SLICE_X37Y177";
-                    siteName = "SLICE_X37Y29"; //PR_1
-                    break;
-                case "xcvu13p-fsga2577-1-i":
-                    siteName = "SLICE_X67Y624";
-                    break;
-                default:
-                    siteName = "SLICE_X67Y624";
-         }
+            case "xck26-sfvc784-2LV-c":
+                //siteName = "SLICE_X37Y177";
+                siteName = "SLICE_X37Y29"; //PR_1
+                break;
+            case "xcvu13p-fsga2577-1-i":
+                siteName = "SLICE_X67Y624";
+                break;
+            default:
+                siteName = "SLICE_X67Y624";
+        }
 
         centerSite = device.getSite(siteName);
         String tileName = centerSite.getTile().getName();
