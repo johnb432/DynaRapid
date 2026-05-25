@@ -161,8 +161,8 @@ public class GenerateDesign {
             System.out.println("\t<arg> : Can be the name of SLICE site like SLICE_X#_Y#");
             System.out.println("\t<arg> : Can be R<row_number>_C<column_number>_Side<side>. The side can be -1 for left and +1 for right");
             System.out.println("-pblock <topLeft> <bottomRight> - Rectangluar pblock constraining the placement of the design. Specify both boundary coordinates in 'SLICE_X#Y#' format");
-            System.out.println("-targetPeriod <arg> - Period (ns) the design should reach. DynaRapid will try to achieve the specified period by inserting buffers.");
-            System.out.println("-pipeline - Specifies that the design should have buffers inserted in such a way, so that it may take 1 input every clock cycle. Only works on linear designs.");
+            System.out.println("-targetPeriod <arg> - Desired clock period (ns) of the generated design. The minimum clock period depends on the specific design.");
+            System.out.println("-streaming - Enables continuous input processing at a rate of one input per clock cycle. Supported only for linear dataflow designs.");
             System.out.println("-bit <arg> - Use Vivado (if on PATH) to generate a bitstream");
             return;
         }
@@ -461,7 +461,7 @@ public class GenerateDesign {
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
         int targetPeriodIndex = StringUtils.findInArray("-targetPeriod", args);
-        boolean pipeline = StringUtils.findInArray("-pipeline", args) != -1;
+        boolean pipeline = StringUtils.findInArray("-streaming", args) != -1;
 
         if (targetPeriodIndex != -1 || pipeline) {
             Double targetPeriod = null;

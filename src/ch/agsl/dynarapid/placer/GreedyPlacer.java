@@ -304,37 +304,37 @@ public class GreedyPlacer implements Placer {
                 Node node = nodes.get(name);
 
 
-                    if ( ! node.name.contains("start")) {
+                if ( ! node.name.contains("start")) {
                     
-                //checking all the inputs of node
-                for(Input in : node.inputs)
-                {
-                    if(in.validArray == null) //Means a starting node
-                        continue;
-
-                    Node outputNode = in.validArray.node;
-                    String outputNodeName = outputNode.name;
-                    if(!visited.contains(outputNodeName))
+                    //checking all the inputs of node
+                    for(Input in : node.inputs)
                     {
-                        nodeList.add(outputNodeName);
-                        visited.add(outputNodeName);
+                        if(in.validArray == null) //Means a starting node
+                            continue;
+
+                        Node outputNode = in.validArray.node;
+                        String outputNodeName = outputNode.name;
+                        if(!visited.contains(outputNodeName))
+                        {
+                            nodeList.add(outputNodeName);
+                            visited.add(outputNodeName);
+                        }
                     }
-                }
 
-                //checking all the outputs of the node
-                for(Output out : node.outputs)
-                {
-                    if(out.pValidArray == null) //Means a ending node
-                        continue;
-
-                    Node inputNode = out.pValidArray.node;
-                    String inputNodeName = inputNode.name;
-                    if(!visited.contains(inputNodeName))
+                    //checking all the outputs of the node
+                    for(Output out : node.outputs)
                     {
-                        nodeList.add(inputNodeName);
-                        visited.add(inputNodeName);
+                        if(out.pValidArray == null) //Means a ending node
+                            continue;
+
+                        Node inputNode = out.pValidArray.node;
+                        String inputNodeName = inputNode.name;
+                        if(!visited.contains(inputNodeName))
+                        {
+                            nodeList.add(inputNodeName);
+                            visited.add(inputNodeName);
+                        }
                     }
-                }
                 }
                 pos++;
             }
